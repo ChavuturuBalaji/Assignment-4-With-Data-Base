@@ -25,7 +25,7 @@
     <form action="/get">
         <input type="submit" value="Get">
     </form>
-    <form action="/Employee/getall">
+    <form action="/all">
         <input type="submit" value="Get All">
     </form>
     <form action="/delete">
