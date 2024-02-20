@@ -17,15 +17,35 @@ public class EmpSerImpl implements EmpSerInter {
     }
 
     @Override
-    public Employee add(Employee employee) {
-        if(empRepo.existsById(employee.getId())){
-            return null;
+    public String add(Employee employee) {
+        try {
+            int i = Integer.parseInt(String.valueOf(employee.getId()));
+            System.out.println("i:- "+ i);
         }
-        return empRepo.save(employee);
+        catch (NumberFormatException e){
+            return "invalid";
+        }
+        if(empRepo.existsById(employee.getId())){
+            return "duplicate";
+        }
+        else if (employees().stream().anyMatch(i -> i.getName().equalsIgnoreCase(employee.getName()))) {
+            return "notAdded";
+        }
+        else if (employee == null || employee.getId() <= 0 || employee.getRole().isBlank() || employee.getName().isBlank() || employee.getSalary()<10000) {
+            return "null";
+        }
+
+        System.out.println("5");
+        empRepo.save(employee);
+        return "added";
     }
 
     @Override
     public Employee update(Employee employee) {
+        Employee empUpdate = empRepo.findById(employee.getId()).get();
+        empUpdate.setName(employee.getName());
+        empUpdate.setRole(employee.getRole());
+        empUpdate.setSalary(employee.getSalary());
         return empRepo.save(employee);
     }
 
@@ -51,4 +71,18 @@ public class EmpSerImpl implements EmpSerInter {
     public List<Employee> employees() {
         return empRepo.findAll();
     }
+
+    @Override
+    public List<Employee> deleteByName(String name) {
+        List<Employee> emplDeleteByName = empRepo.findAll().stream().filter(i -> i.getName().equalsIgnoreCase(name)).toList();
+
+        if(emplDeleteByName.size() == 1){
+            int id = emplDeleteByName.stream().findFirst().get().getId();
+            empRepo.deleteById(id);
+            return emplDeleteByName;
+        }
+        return emplDeleteByName;
+    }
+
+
 }
