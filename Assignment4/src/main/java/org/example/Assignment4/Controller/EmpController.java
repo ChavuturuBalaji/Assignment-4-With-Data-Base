@@ -12,10 +12,11 @@ import java.util.List;
 
 @Controller
 public class EmpController {
+
     @Autowired
     EmpSerImpl empSer;
 
-    @RequestMapping("/home")
+    @RequestMapping("/")
     public String home(){
         return "home";
     }
@@ -43,25 +44,23 @@ public class EmpController {
     }
 
     @RequestMapping("/updateDetails")
-    public String updateDetails(@RequestParam("id") int id, ModelMap model){
+    public String updateDetails(@RequestParam("employeeId") int id, ModelMap model){
         Employee empUpd = empSer.getEmployee(id);
+        if(empUpd == null){
+            return "notFound";
+        }
         model.put("empUpd",empUpd);
         return "updateDetails";
     }
 
 
     @PostMapping("/store")
-    public String add(@ModelAttribute("employee")  @RequestBody Employee employee, ModelMap model){
-        Employee emp = empSer.add(employee);
-        if(emp==null){
-            return "notAdded";
-        }
-        model.put("emp",emp);
-        return "added";
+    public String add(@ModelAttribute("employee")  @RequestBody Employee employee){
+        return empSer.add(employee);
     }
 
     @GetMapping("/Employee/delete")
-    public String delete(@RequestParam("id") int id,ModelMap model){
+    public String delete(@RequestParam("employeeId") int id,ModelMap model){
         Employee empDel = empSer.delete(id);
         model.put("empDel",empDel);
         return "deleted";
@@ -84,14 +83,22 @@ public class EmpController {
 
     @PostMapping("/Employee/update")
     public String update(@ModelAttribute("empUpd")@RequestBody Employee employee,ModelMap model){
-        Employee empUpdate  = empSer.getEmployee(employee.getId());
-        empUpdate.setName(employee.getName());
-        empUpdate.setRole(employee.getRole());
-        empUpdate.setSalary(employee.getSalary());
+        Employee empUpdate = empSer.update(employee);
         model.put("empUpdate",empUpdate);
-        System.out.println(empUpdate.getName() + " " + empUpdate.getId());
-        empSer.update(empUpdate);
         return "updated";
+    }
+
+    @GetMapping("/deleteByName")
+    public String deleteByName(){
+        return "search";
+    }
+
+    @GetMapping("/deletedByName")
+    public String deletedByName(@RequestParam("name") String name,ModelMap model){
+        List<Employee> employees = empSer.deleteByName(name);
+        System.out.println("size:- " + employees.size());
+        model.put("employees",employees);
+        return (employees.size()==1)? "deleteByNameSingleEmp" :"multiple";
     }
 
 }
